@@ -28,7 +28,8 @@ else
     exit 1
 fi
 
-sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /mnt/server/nginx/conf.d/default.conf
+sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+
 
 
 # Start PHP-FPM
