@@ -28,7 +28,10 @@ else
     exit 1
 fi
 
-sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+if [ -f "/home/container/nginx/conf.d/default.conf" ]; then
+    echo "Replacing DOMAIN in Nginx configuration..."
+    sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+fi
 
 
 
