@@ -37,6 +37,14 @@ else
     exit 1
 fi
 
+if [ "${ENABLE_SSL}" = "true" ]; then
+    echo "Configuring SSL with Let's Encrypt..."
+    certbot --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}" || {
+        echo "Failed to configure SSL."; exit 1;
+    }
+    echo "SSL setup complete."
+fi
+
 # NGINX if else WIP
 echo "⏳ Starting Nginx..."
 # Final message
