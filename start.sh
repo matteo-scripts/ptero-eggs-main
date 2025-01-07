@@ -3,8 +3,6 @@ echo "DEBUG: ENABLE_SSL=${ENABLE_SSL}"
 echo "DEBUG: SSL_EMAIL=${SSL_EMAIL}"
 echo "DEBUG: DOMAIN=${DOMAIN}"
 
-
-
 # Colors for output
 GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
@@ -43,16 +41,13 @@ fi
 
 # Replace DOMAIN in Nginx config
 if [ -f "/home/container/nginx/conf.d/default.conf" ]; then
-echo "Replacing DOMAIN in Nginx configuration..."
-sed -i "s|\\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
-log_success "Replaced DOMAIN in /home/container/nginx/conf.d/default.conf"
-
+    echo "Replacing DOMAIN in Nginx configuration..."
+    sed -i "s|\\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+    log_success "Replaced DOMAIN in /home/container/nginx/conf.d/default.conf"
 else
     log_error "Nginx configuration file not found at /home/container/nginx/conf.d/default.conf"
     exit 1
 fi
-
-
 
 # Display updated Nginx config for debugging
 echo "Updated Nginx configuration:"
@@ -70,7 +65,15 @@ fi
 # Configure SSL if enabled
 if [ "${ENABLE_SSL}" = "true" ] || [ "${ENABLE_SSL}" = "1" ]; then
     echo "⏳ Configuring SSL with Let's Encrypt..."
-    if certbot --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}"; then
+
+    # Explicit path to Certbot
+    CERTBOT_PATH="/usr/bin/certbot"
+    if [ ! -x "$CERTBOT_PATH" ]; then
+        log_error "Certbot not found at $CERTBOT_PATH. Please check if Certbot is installed."
+        exit 1
+    fi
+
+    if "$CERTBOT_PATH" --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}"; then
         echo "✅ SSL setup complete."
     else
         echo "❌ Certbot failed to configure SSL. Check Certbot logs for details."
@@ -79,9 +82,6 @@ if [ "${ENABLE_SSL}" = "true" ] || [ "${ENABLE_SSL}" = "1" ]; then
 else
     echo "⚠️ SSL setup skipped. ENABLE_SSL is not properly set."
 fi
-
-
-
 
 # Start Nginx
 echo "⏳ Starting Nginx..."
