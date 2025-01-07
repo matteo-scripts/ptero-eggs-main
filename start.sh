@@ -31,6 +31,15 @@ else
     exit 1
 fi
 
+# Install Certbot if not already installed
+if ! command -v certbot > /dev/null; then
+    echo "Certbot not found. Installing Certbot..."
+    apk add --no-cache certbot certbot-nginx || { echo "Failed to install Certbot"; exit 1; }
+    echo "Certbot installed successfully."
+else
+    echo "Certbot is already installed."
+fi
+
 # Check and set DOMAIN
 if [ -z "$DOMAIN" ]; then
     log_warning "DOMAIN variable is not set. Using default: webtest.matahost.eu"
@@ -56,41 +65,4 @@ cat /home/container/nginx/conf.d/default.conf
 # Start PHP-FPM
 echo "⏳ Starting PHP-FPM..."
 if /usr/sbin/php-fpm8 --fpm-config /home/container/php-fpm/php-fpm.conf --daemonize; then
-    log_success "PHP-FPM started successfully."
-else
-    log_error "Failed to start PHP-FPM."
-    exit 1
-fi
-
-# Configure SSL if enabled
-if [ "${ENABLE_SSL}" = "true" ] || [ "${ENABLE_SSL}" = "1" ]; then
-    echo "⏳ Configuring SSL with Let's Encrypt..."
-
-    # Explicit path to Certbot
-    CERTBOT_PATH="/usr/bin/certbot"
-    if [ ! -x "$CERTBOT_PATH" ]; then
-        log_error "Certbot not found at $CERTBOT_PATH. Please check if Certbot is installed."
-        exit 1
-    fi
-
-    if "$CERTBOT_PATH" --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}"; then
-        echo "✅ SSL setup complete."
-    else
-        echo "❌ Certbot failed to configure SSL. Check Certbot logs for details."
-        exit 1
-    fi
-else
-    echo "⚠️ SSL setup skipped. ENABLE_SSL is not properly set."
-fi
-
-# Start Nginx
-echo "⏳ Starting Nginx..."
-if /usr/sbin/nginx -c /home/container/nginx/nginx.conf -p /home/container/; then
-    log_success "Nginx started successfully."
-else
-    log_error "Failed to start Nginx."
-    exit 1
-fi
-
-# Keep the container running (optional, depending on your container setup)
-tail -f /dev/null
+    log_success "PH
