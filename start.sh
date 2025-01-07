@@ -38,13 +38,16 @@ fi
 
 # Replace DOMAIN in Nginx config
 if [ -f "/home/container/nginx/conf.d/default.conf" ]; then
-    echo "Replacing DOMAIN in Nginx configuration..."
-    sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
-    log_success "Replaced DOMAIN in /home/container/nginx/conf.d/default.conf"
+echo "Replacing DOMAIN in Nginx configuration..."
+sed -i "s|\\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+log_success "Replaced DOMAIN in /home/container/nginx/conf.d/default.conf"
+
 else
     log_error "Nginx configuration file not found at /home/container/nginx/conf.d/default.conf"
     exit 1
 fi
+
+
 
 # Display updated Nginx config for debugging
 echo "Updated Nginx configuration:"
