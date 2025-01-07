@@ -1,5 +1,7 @@
 #!/bin/ash
 echo "DEBUG: ENABLE_SSL=${ENABLE_SSL}"
+echo "DEBUG: SSL_EMAIL=${SSL_EMAIL}"
+echo "DEBUG: DOMAIN=${DOMAIN}"
 
 
 
