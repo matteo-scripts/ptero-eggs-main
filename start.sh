@@ -68,27 +68,18 @@ else
 fi
 
 # Configure SSL if enabled
-if [ "${ENABLE_SSL}" = "true" ]; then
+if [ "${ENABLE_SSL}" = "true" ] || [ "${ENABLE_SSL}" = "1" ]; then
     echo "⏳ Configuring SSL with Let's Encrypt..."
-    echo "DEBUG: Running Certbot with DOMAIN=${DOMAIN} and SSL_EMAIL=${SSL_EMAIL}"
-
     if certbot --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}"; then
         echo "✅ SSL setup complete."
     else
         echo "❌ Certbot failed to configure SSL. Check Certbot logs for details."
         exit 1
     fi
-
-    # Verify the certificates exist
-    if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ] && [ -f "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" ]; then
-        echo "✅ SSL certificates created successfully."
-    else
-        echo "❌ SSL certificates are missing after Certbot execution."
-        exit 1
-    fi
 else
-    echo "⚠️ SSL setup skipped. ENABLE_SSL is set to false."
+    echo "⚠️ SSL setup skipped. ENABLE_SSL is not properly set."
 fi
+
 
 
 
