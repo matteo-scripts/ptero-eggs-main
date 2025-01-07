@@ -28,10 +28,15 @@ else
     exit 1
 fi
 
-if [ -f "/home/container/nginx/conf.d/default.conf" ]; then
-    echo "Replacing DOMAIN in Nginx configuration..."
-    sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+
+if [ -z "$DOMAIN" ]; then
+    echo "Error: DOMAIN variable is not set. Please set DOMAIN in the environment variables."
+    exit 1
 fi
+
+# Nahrazení proměnné DOMAIN v konfiguraci
+sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+
 
 
 
