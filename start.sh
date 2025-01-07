@@ -28,17 +28,27 @@ else
     exit 1
 fi
 
-
+# Check and set DOMAIN
 if [ -z "$DOMAIN" ]; then
-    echo "Error: DOMAIN variable is not set. Please set DOMAIN in the environment variables."
+    log_warning "DOMAIN variable is not set. Using default: webtest.matahost.eu"
+    DOMAIN="webtest.matahost.eu"
+else
+    log_success "DOMAIN is set to: $DOMAIN"
+fi
+
+# Replace DOMAIN in Nginx config
+if [ -f "/home/container/nginx/conf.d/default.conf" ]; then
+    echo "Replacing DOMAIN in Nginx configuration..."
+    sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
+    log_success "Replaced DOMAIN in /home/container/nginx/conf.d/default.conf"
+else
+    log_error "Nginx configuration file not found at /home/container/nginx/conf.d/default.conf"
     exit 1
 fi
 
-# Nahrazení proměnné DOMAIN v konfiguraci
-sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /home/container/nginx/conf.d/default.conf
-
-
-
+# Display updated Nginx config for debugging
+echo "Updated Nginx configuration:"
+cat /home/container/nginx/conf.d/default.conf
 
 # Start PHP-FPM
 echo "⏳ Starting PHP-FPM..."
@@ -49,19 +59,26 @@ else
     exit 1
 fi
 
+# Configure SSL if enabled
 if [ "${ENABLE_SSL}" = "true" ]; then
-    echo "Configuring SSL with Let's Encrypt..."
+    echo "⏳ Configuring SSL with Let's Encrypt..."
     certbot --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}" || {
-        echo "Failed to configure SSL."; exit 1;
+        log_error "Failed to configure SSL with Certbot. Check logs for details."
+        exit 1
     }
-    echo "SSL setup complete."
+    log_success "SSL setup complete."
+else
+    log_warning "SSL setup skipped. ENABLE_SSL is not set to true."
 fi
 
-# NGINX if else WIP
+# Start Nginx
 echo "⏳ Starting Nginx..."
-# Final message
-log_success "Web server is running. All services started successfully."
-/usr/sbin/nginx -c /home/container/nginx/nginx.conf -p /home/container/
+if /usr/sbin/nginx -c /home/container/nginx/nginx.conf -p /home/container/; then
+    log_success "Nginx started successfully."
+else
+    log_error "Failed to start Nginx."
+    exit 1
+fi
 
 # Keep the container running (optional, depending on your container setup)
 tail -f /dev/null
