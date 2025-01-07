@@ -65,14 +65,30 @@ fi
 # Configure SSL if enabled
 if [ "${ENABLE_SSL}" = "true" ]; then
     echo "⏳ Configuring SSL with Let's Encrypt..."
-    certbot --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}" || {
-        log_error "Failed to configure SSL with Certbot. Check logs for details."
+    
+    # Debug výpis pro jistotu, že proměnné jsou správně nastavené
+    echo "SSL_EMAIL: ${SSL_EMAIL}"
+    echo "DOMAIN: ${DOMAIN}"
+    
+    # Spuštění Certbotu pro vytvoření certifikátu
+    if certbot --nginx -n --agree-tos --email "${SSL_EMAIL}" -d "${DOMAIN}"; then
+        echo "✅ SSL setup complete."
+    else
+        echo "❌ Failed to configure SSL with Certbot. Check logs for details."
         exit 1
-    }
-    log_success "SSL setup complete."
+    fi
+    
+    # Ověření, zda certifikáty byly vytvořeny
+    if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ] && [ -f "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" ]; then
+        echo "✅ SSL certificates exist and are ready to use."
+    else
+        echo "❌ SSL certificates are missing! Certbot may have failed."
+        exit 1
+    fi
 else
-    log_warning "SSL setup skipped. ENABLE_SSL is not set to true."
+    echo "⚠️ SSL setup skipped. ENABLE_SSL is set to false."
 fi
+
 
 # Start Nginx
 echo "⏳ Starting Nginx..."
