@@ -1,4 +1,7 @@
 #!/bin/ash
+echo "DEBUG: ENABLE_SSL=${ENABLE_SSL}"
+
+
 
 # Colors for output
 GREEN="\033[0;32m"
