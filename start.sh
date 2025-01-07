@@ -1,6 +1,4 @@
 #!/bin/ash
-echo "DEBUG: ENABLE_SSL=${ENABLE_SSL}"
-echo "DEBUG: SSL_EMAIL=${SSL_EMAIL}"
 echo "DEBUG: DOMAIN=${DOMAIN}"
 
 # Colors for output
@@ -31,15 +29,6 @@ else
     exit 1
 fi
 
-# Install Certbot if not already installed
-if ! command -v certbot > /dev/null; then
-    echo "Certbot not found. Installing Certbot..."
-    apk add --no-cache certbot certbot-nginx || { echo "Failed to install Certbot"; exit 1; }
-    echo "Certbot installed successfully."
-else
-    echo "Certbot is already installed."
-fi
-
 # Check and set DOMAIN
 if [ -z "$DOMAIN" ]; then
     log_warning "DOMAIN variable is not set. Using default: webtest.matahost.eu"
@@ -65,4 +54,8 @@ cat /home/container/nginx/conf.d/default.conf
 # Start PHP-FPM
 echo "⏳ Starting PHP-FPM..."
 if /usr/sbin/php-fpm8 --fpm-config /home/container/php-fpm/php-fpm.conf --daemonize; then
-    log_success "PH
+    log_success "PHP-FPM started successfully."
+else
+    log_error "Failed to start PHP-FPM."
+    exit 1
+fi
