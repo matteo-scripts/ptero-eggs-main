@@ -28,6 +28,9 @@ else
     exit 1
 fi
 
+sed -i "s|\\${DOMAIN}|${DOMAIN}|g" /mnt/server/nginx/conf.d/default.conf
+
+
 # Start PHP-FPM
 echo "⏳ Starting PHP-FPM..."
 if /usr/sbin/php-fpm8 --fpm-config /home/container/php-fpm/php-fpm.conf --daemonize; then
